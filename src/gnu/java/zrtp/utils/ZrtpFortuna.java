@@ -45,7 +45,7 @@ public class ZrtpFortuna implements RandomGenerator {
 
 	private void initialize() {
 		byte[] someData = new byte[256];
-		new java.util.Random().nextBytes(someData);
+		new java.security.SecureRandom().nextBytes(someData);
 		fortuna = new FortunaGenerator(someData);
 	}
 
