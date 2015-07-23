@@ -8,7 +8,7 @@
     <groupId>org.jitsi</groupId>
     <artifactId>jitsi-universe</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <relativePath>../jitsi-universe/pom.xml</relativePath>
+    <relativePath>../../../jitsi-universe/pom.xml</relativePath>
   </parent>
 
   <artifactId>zrtp4j-light</artifactId>
