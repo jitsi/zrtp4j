@@ -20,7 +20,8 @@
 package gnu.java.zrtp;
 
 import gnu.java.bigintcrypto.BigIntegerCrypto;
-import gnu.java.zrtp.utils.ZrtpFortuna;
+
+import java.security.SecureRandom;
 
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
@@ -28,7 +29,7 @@ import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
-
+import org.bouncycastle.crypto.prng.RandomGenerator;
 import org.bouncycastle.cryptozrtp.agreement.ECDHBasicAgreement;
 import org.bouncycastle.cryptozrtp.params.ECDomainParameters;
 import org.bouncycastle.cryptozrtp.params.ECKeyGenerationParameters;
@@ -312,20 +313,47 @@ public class ZrtpConstants {
     public static final X9ECParameters x9Ec25 = SECNamedCurves.getByName("secp256r1");
     public static final X9ECParameters x9Ec38 = SECNamedCurves.getByName("secp384r1");
 
+    private static RandomGenerator _secureRandomGenerator = new RandomGenerator() {
+
+        private SecureRandom _sr = new SecureRandom();
+
+        public void addSeedMaterial(byte[] seed)
+        {
+            _sr.setSeed(seed);
+        }
+
+        public void addSeedMaterial(long seed)
+        {
+            _sr.setSeed(seed);
+        }
+
+        public void nextBytes(byte[] bytes)
+        {
+            _sr.nextBytes(bytes);
+        }
+
+        public void nextBytes(byte[] bytes, int start, int len)
+        {
+            byte[] tmp = new byte[len];
+            _sr.nextBytes(tmp);
+            System.arraycopy(tmp, 0, bytes, start, len);
+        }
+    };
+
     public static enum SupportedPubKeys {
         EC25(ec25, 64, new ECKeyGenerationParameters(
                 new ECDomainParameters(x9Ec25.getCurve(),
                         x9Ec25.getG(), x9Ec25.getN(), x9Ec25.getH(),
-                        x9Ec25.getSeed()), ZrtpFortuna.getInstance())), 
+                        x9Ec25.getSeed()), _secureRandomGenerator)),
         EC38(ec38, 96, new ECKeyGenerationParameters(
                 new ECDomainParameters(x9Ec38.getCurve(),
                          x9Ec38.getG(), x9Ec38.getN(), x9Ec38.getH(),
-                         x9Ec38.getSeed()), ZrtpFortuna.getInstance())), 
+                         x9Ec38.getSeed()), _secureRandomGenerator)),
         DH2K(dh2k, 256,
-                new DHKeyGenerationParameters(ZrtpFortuna.getInstance(),
+                new DHKeyGenerationParameters(_secureRandomGenerator,
                         specDh2k)), 
         DH3K(dh3k, 384,
-                new DHKeyGenerationParameters(ZrtpFortuna.getInstance(),
+                new DHKeyGenerationParameters(_secureRandomGenerator,
                         specDh3k)), 
         MULT(mult);
 
