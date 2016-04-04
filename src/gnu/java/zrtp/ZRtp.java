@@ -35,11 +35,11 @@ import gnu.java.zrtp.packets.ZrtpPacketRelayAck;
 import gnu.java.zrtp.packets.ZrtpPacketSASRelay;
 import gnu.java.zrtp.utils.Base32;
 import gnu.java.zrtp.utils.ZrtpUtils;
-import gnu.java.zrtp.utils.ZrtpFortuna;
 import gnu.java.zrtp.zidfile.ZidFile;
 import gnu.java.zrtp.zidfile.ZidRecord;
 
 import java.util.EnumSet;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import gnu.java.bigintcrypto.BigIntegerCrypto;
@@ -142,7 +142,7 @@ public class ZRtp {
 
     private AsymmetricCipherKeyPair ecKeyPair = null;
 
-    private ZrtpFortuna secRand;
+    private SecureRandom secRand;
 
     /**
      * The computed DH shared secret
@@ -462,7 +462,7 @@ public class ZRtp {
      */
     public ZRtp(byte[] myZid, ZrtpCallback cb, String id, ZrtpConfigure config, boolean mitmMode, boolean sasSignSupport) {
 
-        secRand = ZrtpFortuna.getInstance();
+        secRand = new SecureRandom();
 
         configureAlgos = config;
         enableMitmEnrollment = config.isTrustedMitM();
