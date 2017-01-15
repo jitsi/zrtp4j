@@ -2,30 +2,26 @@ package demo;
 
 import gnu.java.zrtp.ZrtpConstants;
 
-import gnu.java.bigintcrypto.BigIntegerCrypto;
-
-import java.util.Random;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
-import org.bouncycastle.cryptozrtp.generators.DHBasicKeyPairGenerator;
-import org.bouncycastle.cryptozrtp.params.DHKeyGenerationParameters;
-import org.bouncycastle.cryptozrtp.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.DataLengthException;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-//import org.bouncycastle.cryptozrtp.InvalidCipherTextException;
-import org.bouncycastle.cryptozrtp.agreement.DHBasicAgreement;
-import org.bouncycastle.cryptozrtp.params.DHPublicKeyParameters;
 
+import org.bouncycastle.crypto.agreement.DHBasicAgreement;
 import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
 import org.bouncycastle.crypto.macs.HMac;
+import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.params.ParametersWithIV;
-import org.bouncycastle.crypto.prng.RandomGenerator;
-import org.jitsi.bccontrib.prng.FortunaGenerator;
 
 import gnu.java.zrtp.utils.ZrtpUtils;
 
@@ -62,9 +58,10 @@ public class CryptoTestPureLW {
     byte[] dataToSecure = dataAsText.getBytes();
     
     boolean testProvider() {
-    	byte[] rnd = new byte[256];
-    	new Random().nextBytes(rnd);
-    	RandomGenerator secRand = new FortunaGenerator(rnd);
+        byte[] rnd = new byte[256];
+        SecureRandom secRand = new SecureRandom();
+        secRand.nextBytes(rnd);
+
         /*
          * Test and check DH key agreement
          */
@@ -86,7 +83,7 @@ public class CryptoTestPureLW {
         
         // get B party's public key 
         DHPublicKeyParameters tmp = (DHPublicKeyParameters) myKeyPairLwB.getPublic();
-        BigIntegerCrypto y = tmp.getY();                            // and the big int value of it
+        BigInteger y = tmp.getY();                            // and the big int value of it
 
         // System.out.println("B public length: " + y.toByteArray().length);
         
@@ -95,7 +92,7 @@ public class CryptoTestPureLW {
         // calculate the secret value of A party, using B party's value
         dhContextLwA = new DHBasicAgreement();
         dhContextLwA.init(myKeyPairLwA.getPrivate());        
-        BigIntegerCrypto resultLwA = dhContextLwA.calculateAgreement(new DHPublicKeyParameters(y, ZrtpConstants.specDh3k));
+        BigInteger resultLwA = dhContextLwA.calculateAgreement(new DHPublicKeyParameters(y, ZrtpConstants.specDh3k));
 
         
         // get A party's public key 
@@ -109,7 +106,7 @@ public class CryptoTestPureLW {
         // then calculate the secret value of A party, using B party's value
         dhContextLwB = new DHBasicAgreement();       
         dhContextLwB.init(myKeyPairLwB.getPrivate());
-        BigIntegerCrypto resultLwB = dhContextLwB.calculateAgreement(new DHPublicKeyParameters(y, ZrtpConstants.specDh3k));
+        BigInteger resultLwB = dhContextLwB.calculateAgreement(new DHPublicKeyParameters(y, ZrtpConstants.specDh3k));
 
         byte[] lwByteA = adjustKey(resultLwA);
         byte[] lwByteB = adjustKey(resultLwB);
@@ -187,7 +184,7 @@ public class CryptoTestPureLW {
         return true;
     }
     
-    byte[] adjustKey(BigIntegerCrypto in)  {
+    byte[] adjustKey(BigInteger in)  {
         byte[] inBytes = in.toByteArray();
         // check for leading zero byte if public key resulted in negative
         // value. BigIntegerCrypto adds a leading zero to drop the negative sign bit

@@ -33,13 +33,12 @@ import gnu.java.zrtp.jmf.transform.RawPacket;
 import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.macs.*;
 import org.bouncycastle.crypto.params.KeyParameter;
-import org.jitsi.bccontrib.macs.SkeinMac;
-import org.jitsi.bccontrib.params.ParametersForSkein;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.Mac;
 
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
+import org.bouncycastle.crypto.params.SkeinParameters;
 
 
 /**
@@ -272,9 +271,9 @@ public class SRTPCryptoContext
             break;
             
         case SRTPPolicy.SKEIN_AUTHENTICATION:
-            mac = new SkeinMac();
             authKey = new byte[policy.getAuthKeyLength()];
             tagStore = new byte[policy.getAuthTagLength()];
+            mac = new SkeinMac(SkeinMac.SKEIN_512, tagStore.length * 8);
             break;
 
         default:
@@ -662,8 +661,7 @@ public class SRTPCryptoContext
 
             case SRTPPolicy.SKEIN_AUTHENTICATION:
                 // Skein MAC uses number of bits as MAC size, not just bytes
-                ParametersForSkein pfs = new ParametersForSkein(new KeyParameter(authKey),
-                        ParametersForSkein.Skein512, tagStore.length*8);
+                SkeinParameters pfs = new SkeinParameters.Builder().setKey(authKey).build();
                 mac.init(pfs);
                 break;
             }

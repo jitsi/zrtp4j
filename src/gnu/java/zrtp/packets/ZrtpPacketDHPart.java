@@ -19,9 +19,9 @@
 
 package gnu.java.zrtp.packets;
 
-import djb.Curve25519;
 import gnu.java.zrtp.ZrtpConstants;
 import gnu.java.zrtp.utils.ZrtpUtils;
+import org.bouncycastle.math.ec.custom.djb.Curve25519;
 
 
 /**
@@ -117,7 +117,7 @@ public class ZrtpPacketDHPart extends ZrtpPacketBase {
             dhLength = 96;
         }
         else if (pkt == ZrtpConstants.SupportedPubKeys.E255) {
-            dhLength = Curve25519.KEY_SIZE;
+            dhLength = 32; //or new Curve25519().getBitLength()/8
         }
         else
             return;

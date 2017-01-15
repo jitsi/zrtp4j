@@ -1,4 +1,9 @@
 classes/
 doc/
 dist/
-
+.idea/
+.settings/
+*.iml
+.classpath
+.project
+target/

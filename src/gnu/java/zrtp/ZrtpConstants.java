@@ -19,26 +19,25 @@
 
 package gnu.java.zrtp;
 
-import gnu.java.bigintcrypto.BigIntegerCrypto;
-import gnu.java.zrtp.utils.ZrtpFortuna;
-
+import gnu.java.zrtp.utils.ZrtpSecureRandom;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
 import org.bouncycastle.crypto.engines.AESFastEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 
-import org.bouncycastle.cryptozrtp.AsymmetricCipherKeyPairGenerator;
-import org.bouncycastle.cryptozrtp.BasicAgreement;
-import org.bouncycastle.cryptozrtp.agreement.Djb25519DHBasicAgreement;
-import org.bouncycastle.cryptozrtp.agreement.ECDHBasicAgreement;
-import org.bouncycastle.cryptozrtp.generators.Djb25519KeyPairGenerator;
-import org.bouncycastle.cryptozrtp.params.*;
-import org.bouncycastle.cryptozrtp.agreement.DHBasicAgreement;
-import org.bouncycastle.cryptozrtp.generators.DHBasicKeyPairGenerator;
-import org.bouncycastle.cryptozrtp.generators.ECKeyPairGenerator;
-import org.bouncycastle.mathzrtp.ec.ECCurve;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
+import org.bouncycastle.crypto.BasicAgreement;
+import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
+import org.bouncycastle.crypto.params.*;
+import org.bouncycastle.crypto.agreement.DHBasicAgreement;
+import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.math.ec.ECCurve;
+
+import java.math.BigInteger;
 
 /**
  * @author Werner Dittmann <Werner.Dittmann@t-online.de>
@@ -313,20 +312,22 @@ public class ZrtpConstants {
 
     public static final X9ECParameters x9Ec25 = SECNamedCurves.getByName("secp256r1");
     public static final X9ECParameters x9Ec38 = SECNamedCurves.getByName("secp384r1");
+    public static final X9ECParameters curve25519 = CustomNamedCurves.getByName("Curve25519");
 
     public enum SupportedPubKeys {
         EC25(ec25, 64, new ECKeyGenerationParameters(new ECDomainParameters(x9Ec25.getCurve(),
                 x9Ec25.getG(), x9Ec25.getN(), x9Ec25.getH(),
-                x9Ec25.getSeed()), ZrtpFortuna.getInstance())),
+                x9Ec25.getSeed()), ZrtpSecureRandom.getInstance())),
         EC38(ec38, 96, new ECKeyGenerationParameters(new ECDomainParameters(x9Ec38.getCurve(),
                 x9Ec38.getG(), x9Ec38.getN(), x9Ec38.getH(),
-                x9Ec38.getSeed()), ZrtpFortuna.getInstance())),
+                x9Ec38.getSeed()), ZrtpSecureRandom.getInstance())),
+        E255(e255, 32, new ECKeyGenerationParameters(new ECDomainParameters(curve25519.getCurve(),
+                curve25519.getG(), curve25519.getN(), curve25519.getH(),
+                curve25519.getSeed()), ZrtpSecureRandom.getInstance())),
 
-        E255(e255, 32, new Djb25519KeyGenerationParameters(ZrtpFortuna.getInstance())),
-
-        DH2K(dh2k, 256, new DHKeyGenerationParameters(ZrtpFortuna.getInstance(),
+        DH2K(dh2k, 256, new DHKeyGenerationParameters(ZrtpSecureRandom.getInstance(),
                 specDh2k)),
-        DH3K(dh3k, 384, new DHKeyGenerationParameters(ZrtpFortuna.getInstance(),
+        DH3K(dh3k, 384, new DHKeyGenerationParameters(ZrtpSecureRandom.getInstance(),
                 specDh3k)),
         MULT(mult);
 
@@ -380,17 +381,6 @@ public class ZrtpConstants {
             }
             curve = null;
         }
-
-        SupportedPubKeys(byte[] nm, int size, Djb25519KeyGenerationParameters djbdh) {
-            name = nm;
-            pubKeySize = size;
-            keyPairGen = new Djb25519KeyPairGenerator();
-            keyPairGen.init(djbdh);
-            dhContext = new Djb25519DHBasicAgreement();
-            curve = null;
-
-            specDh = null;
-        }
     }
 
     public enum SupportedSASTypes {
@@ -427,7 +417,7 @@ public class ZrtpConstants {
 
     // The Diffie-Helman constants as defined in the ZRTP specification
     // The DH prime for DH2k (2048 bit) as defined in RFC 3526
-    public static final BigIntegerCrypto P2048 = new BigIntegerCrypto(
+    public static final BigInteger P2048 = new BigInteger(
 //                        1                   2        
 //    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3           24 bytes per line
     "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +        // 0
@@ -444,7 +434,7 @@ public class ZrtpConstants {
     
    
     // The DH prime for DH3k (3072 bit) as defined in RFC 3526
-    public static final BigIntegerCrypto P3072 = new BigIntegerCrypto(
+    public static final BigInteger P3072 = new BigInteger(
 //                        1                   2        
 //    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3           24 bytes per line
     "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1" +        // 0
@@ -493,10 +483,10 @@ public class ZrtpConstants {
     "FFFFFFFFFFFFFFFF", 16);                                    // Total = 8 + 24 * 21 = 512 
 *** */
     // DH generator 2
-    public static final BigIntegerCrypto two = BigIntegerCrypto.valueOf(2);
+    public static final BigInteger two = BigInteger.valueOf(2);
     
-    public static final BigIntegerCrypto P2048MinusOne = P2048.subtract(BigIntegerCrypto.ONE);
-    public static final BigIntegerCrypto P3072MinusOne = P3072.subtract(BigIntegerCrypto.ONE);
+    public static final BigInteger P2048MinusOne = P2048.subtract(BigInteger.ONE);
+    public static final BigInteger P3072MinusOne = P3072.subtract(BigInteger.ONE);
 //    public static final BigIntegerCrypto P4096MinusOne = P4096.subtract(BigIntegerCrypto.ONE);
     
     public static final DHParameters specDh2k = new DHParameters(ZrtpConstants.P2048,

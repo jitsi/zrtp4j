@@ -104,7 +104,7 @@ public class TransformConnector
         }
         catch (SocketException e)
         {
-            throw new InvalidSessionAddressException();
+            throw new InvalidSessionAddressException(e.getMessage());
         }
     }
 
