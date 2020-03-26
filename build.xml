@@ -32,7 +32,7 @@
 		<property name="zrtp4j-src-zip.name" value="${product.shortname}-src-${product.version}.zip" />
     	
 		<property name="jmf" value="jmf.jar" />
-		<property name="bc" value="bcprov-jdk15on-148.jar" />
+		<property name="bc" value="bcprov-jdk15on-1.64.jar" />
         <property name="bccontrib" value="bccontrib-1.0-SNAPSHOT.jar" />
 		<property name="junit" value="junit-3.8.1.jar" />
 

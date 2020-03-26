@@ -68,7 +68,7 @@ public class ECDomainParameters
             BigIntegerCrypto b = new BigIntegerCrypto(curveIn.getB().toBigInteger().toByteArray());
             this.curve = new ECCurve.Fp(q, a, b);
 
-            byte[] encoded = GIn.getEncoded();
+            byte[] encoded = GIn.getEncoded(false);
             this.G = this.curve.decodePoint(encoded);
             this.n = new BigIntegerCrypto(nIn.toByteArray());
             this.h = new BigIntegerCrypto(hIn.toByteArray());
