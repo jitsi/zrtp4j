@@ -31,7 +31,7 @@ public class ReceiverMultiZRTP implements ReceiveStreamListener, SessionListener
     ZRTPTransformEngine zrtpEngineMulti = null;
 
     protected class MyCallback extends ZrtpUserCallback {
-        String prefix = new String("");
+        protected String prefix = "";
 
         MyCallback() {
         }

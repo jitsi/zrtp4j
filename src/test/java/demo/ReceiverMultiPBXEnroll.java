@@ -32,7 +32,7 @@ public class ReceiverMultiPBXEnroll implements ReceiveStreamListener, SessionLis
     ZRTPTransformEngine zrtpEngineMulti = null;
 
     protected class MyCallback extends ZrtpUserCallback {
-        String prefix = new String("");
+        protected String prefix = "";
 
         MyCallback() {
         }

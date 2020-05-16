@@ -47,8 +47,8 @@ public class TransmitterMultiZRTP {
         SendStream sendStream = null;
         
         protected class MyCallback extends ZrtpUserCallback {
-            
-            String prefix = new String("");
+
+            protected String prefix = "";
             MyCallback() {
             }
 
