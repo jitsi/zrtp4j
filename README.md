@@ -1,5 +1,5 @@
-zrtp4j (Jitsi Fork)
-===================
+zrtp4j (aka. zrtp4j-light, Jitsi Fork)
+======================================
 
 This package provides a library that adds ZRTP support to JMF
 and FMJ. Phil Zimmermann developed ZRTP to allow ad-hoc, easy to
@@ -24,6 +24,8 @@ This library is licensed under the GNU GPL version 3 or later
 with Classpath Exception, and has been copyright assigned to
 the Free Software Foundation.
 
+Links
+-----
 For further information refer to the ZRTP FAQ and the GNU ZRTP
 How-To. Both are part of the GNU Telephony wiki and are located in its
 documentation category.

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.params.KeyParameter;
 
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESEngine;
 
 import gnu.java.zrtp.jmf.transform.srtp.SRTPCipherF8;
 import gnu.java.zrtp.utils.ZrtpUtils;
@@ -59,8 +59,8 @@ public class F8Tester {
 
     int testF8()
     {
-        cipher = new AESFastEngine();
-        cipherF8 = new AESFastEngine();
+        cipher = new AESEngine();
+        cipherF8 = new AESEngine();
 
         KeyParameter encryptionKey = new KeyParameter(key);
         cipher.init(true, encryptionKey);

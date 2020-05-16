@@ -24,7 +24,7 @@ import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.ec.CustomNamedCurves;
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
 
@@ -286,8 +286,8 @@ public class ZrtpConstants {
         }
     }
     public enum SupportedSymCiphers {
-        AES3(aes3, 32, AES_256, new BufferedBlockCipher(new CFBBlockCipher(new AESFastEngine(), 128)), SupportedSymAlgos.AES),
-        AES1(aes1, 16, AES_128, new BufferedBlockCipher(new CFBBlockCipher(new AESFastEngine(), 128)), SupportedSymAlgos.AES), 
+        AES3(aes3, 32, AES_256, new BufferedBlockCipher(new CFBBlockCipher(new AESEngine(), 128)), SupportedSymAlgos.AES),
+        AES1(aes1, 16, AES_128, new BufferedBlockCipher(new CFBBlockCipher(new AESEngine(), 128)), SupportedSymAlgos.AES), 
         TWO3(two3, 32, TWO_256, new BufferedBlockCipher(new CFBBlockCipher(new TwofishEngine(), 128)), SupportedSymAlgos.TwoFish),
         TWO1(two1, 16, TWO_128, new BufferedBlockCipher(new CFBBlockCipher(new TwofishEngine(), 128)), SupportedSymAlgos.TwoFish);
 

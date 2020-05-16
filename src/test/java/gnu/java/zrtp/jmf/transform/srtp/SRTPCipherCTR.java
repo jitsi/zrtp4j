@@ -26,7 +26,7 @@
 package gnu.java.zrtp.jmf.transform.srtp;
 
 import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESEngine;
 
 /**
  * SRTPCipherCTR implements SRTP Counter Mode AES Encryption (AES-CM).

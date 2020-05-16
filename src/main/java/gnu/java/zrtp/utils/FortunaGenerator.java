@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.crypto.prng.RandomGenerator;
 
@@ -159,7 +159,7 @@ public class FortunaGenerator implements RandomGenerator {
     }
     
     public FortunaGenerator(byte[] seed) {
-        generator = new Generator(new AESFastEngine(), new SHA256Digest());
+        generator = new Generator(new AESEngine(), new SHA256Digest());
         pools = new Digest[NUM_POOLS];
         for (int i = 0; i < NUM_POOLS; i++)
             pools[i] = new SHA256Digest();

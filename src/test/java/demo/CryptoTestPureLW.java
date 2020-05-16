@@ -20,7 +20,7 @@ import org.bouncycastle.crypto.params.KeyParameter;
 
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.modes.CFBBlockCipher;
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.params.ParametersWithIV;
 
 import gnu.java.zrtp.utils.ZrtpUtils;
@@ -134,7 +134,7 @@ public class CryptoTestPureLW {
         
         // test the cipher - LW
         
-        AESFastEngine aesEnc = new AESFastEngine();
+        AESEngine aesEnc = new AESEngine();
         CFBBlockCipher cfbAesEnc = new CFBBlockCipher(aesEnc, aesEnc.getBlockSize() * 8);
         BufferedBlockCipher bufCfbAesEnc = new BufferedBlockCipher(cfbAesEnc);
         bufCfbAesEnc.init(true, new ParametersWithIV(new KeyParameter(masterKey), randomIV));
@@ -154,7 +154,7 @@ public class CryptoTestPureLW {
             e.printStackTrace();
         }
         
-        AESFastEngine aesDec = new AESFastEngine();
+        AESEngine aesDec = new AESEngine();
         CFBBlockCipher cfbAesDec = new CFBBlockCipher(aesDec, aesDec.getBlockSize() * 8);
         BufferedBlockCipher bufCfbAesDec = new BufferedBlockCipher(cfbAesDec);
         bufCfbAesDec.init(false, new ParametersWithIV(new KeyParameter(masterKey), randomIV));

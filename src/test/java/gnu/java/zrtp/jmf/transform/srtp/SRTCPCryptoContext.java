@@ -37,7 +37,7 @@ import org.bouncycastle.crypto.params.SkeinParameters;
 import org.bouncycastle.crypto.BlockCipher;
 import org.bouncycastle.crypto.Mac;
 
-import org.bouncycastle.crypto.engines.AESFastEngine;
+import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
 
 
@@ -210,10 +210,10 @@ public class SRTCPCryptoContext
             break;
 
         case SRTPPolicy.AESF8_ENCRYPTION:
-            cipherF8 = new AESFastEngine();
+            cipherF8 = new AESEngine();
 
         case SRTPPolicy.AESCM_ENCRYPTION:
-            cipher = new AESFastEngine();
+            cipher = new AESEngine();
             encKey = new byte[this.policy.getEncKeyLength()];
             saltKey = new byte[this.policy.getSaltKeyLength()];
             break;
