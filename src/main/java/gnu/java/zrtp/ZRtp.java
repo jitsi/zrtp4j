@@ -76,7 +76,6 @@ import java.util.EnumSet;
  * </pre>
  * 
  * @see ZrtpCallback
- * @see gnu.java.zrtp.jmf.transform.zrtp.ZRTPTransformEngine
  * 
  * @author Werner Dittmann &lt;Werner.Dittmann@t-online.de&gt;
  * 

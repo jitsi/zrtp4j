@@ -244,8 +244,6 @@ public interface ZrtpCallback {
      *
      * @param sasHash
      *    The SAS hash to sign.
-     *
-     * @see gnu.java.zrtp.jmf.transform.zrtp.ZRTPTransformEngine#setSignatureData
      */
     void signSAS(byte[] sasHash);
 
@@ -270,8 +268,6 @@ public interface ZrtpCallback {
      *    The SAS hash that was signed by the other peer.
      * @return
      *    <code>true</code> if the signature was ok, false otherwise.
-     *
-     * @see gnu.java.zrtp.jmf.transform.zrtp.ZRTPTransformEngine#getSignatureData
      */
     boolean checkSASSignature(byte[] sasHash);
 }
