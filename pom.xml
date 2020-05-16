@@ -6,7 +6,7 @@
 
     <groupId>org.jitsi</groupId>
     <artifactId>zrtp4j-light</artifactId>
-    <version>4.1.1</version>
+    <version>4.1.2-SNAPSHOT</version>
     <packaging>bundle</packaging>
     <description>ZRTP for Java library, Jitsi fork without embedded ciphers</description>
 
