@@ -6,7 +6,7 @@
 
     <groupId>org.jitsi</groupId>
     <artifactId>zrtp4j-light</artifactId>
-    <version>4.1.0-SNAPSHOT</version>
+    <version>4.1.1</version>
     <packaging>bundle</packaging>
     <description>ZRTP for Java library, Jitsi fork without embedded ciphers</description>
 
@@ -25,6 +25,21 @@
             <email>dev@jitsi.org</email>
         </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/dnsjava/dnsjava</connection>
+        <developerConnection>scm:git:https://github.com/dnsjava/dnsjava</developerConnection>
+        <url>https://github.com/dnsjava/dnsjava</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>GPL-3.0-or-later WITH Classpath-exception-2.0</name>
+            <url>https://spdx.org/licenses/GPL-3.0-or-later.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
