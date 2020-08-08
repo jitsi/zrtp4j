@@ -23,18 +23,23 @@ import gnu.java.zrtp.utils.ZrtpSecureRandom;
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.ec.CustomNamedCurves;
+import org.bouncycastle.crypto.RawAgreement;
+import org.bouncycastle.crypto.agreement.DHBasicAgreement;
+import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
+import org.bouncycastle.crypto.agreement.X25519Agreement;
 import org.bouncycastle.crypto.engines.AESEngine;
 import org.bouncycastle.crypto.engines.TwofishEngine;
-import org.bouncycastle.crypto.modes.CFBBlockCipher;
-
-import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
-import org.bouncycastle.crypto.BasicAgreement;
-import org.bouncycastle.crypto.agreement.ECDHBasicAgreement;
-import org.bouncycastle.crypto.params.*;
-import org.bouncycastle.crypto.agreement.DHBasicAgreement;
 import org.bouncycastle.crypto.generators.DHBasicKeyPairGenerator;
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.generators.X25519KeyPairGenerator;
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
+import org.bouncycastle.crypto.BasicAgreement;
+import org.bouncycastle.crypto.params.DHKeyGenerationParameters;
+import org.bouncycastle.crypto.params.DHParameters;
+import org.bouncycastle.crypto.params.ECDomainParameters;
+import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
+import org.bouncycastle.crypto.params.X25519KeyGenerationParameters;
 import org.bouncycastle.math.ec.ECCurve;
 
 import java.math.BigInteger;
@@ -312,25 +317,16 @@ public class ZrtpConstants {
 
     public static final X9ECParameters x9Ec25 = SECNamedCurves.getByName("secp256r1");
     public static final X9ECParameters x9Ec38 = SECNamedCurves.getByName("secp384r1");
-    public static final X9ECParameters curve25519 = CustomNamedCurves.getByName("Curve25519");
+//    public static final X9ECParameters curve25519 = CustomNamedCurves.getByName("Curve25519");
 
     public enum SupportedPubKeys {
-        EC25(ec25, 64, new ECKeyGenerationParameters(new ECDomainParameters(x9Ec25.getCurve(),
-                x9Ec25.getG(), x9Ec25.getN(), x9Ec25.getH(),
-                x9Ec25.getSeed()), ZrtpSecureRandom.getInstance())),
-        EC38(ec38, 96, new ECKeyGenerationParameters(new ECDomainParameters(x9Ec38.getCurve(),
-                x9Ec38.getG(), x9Ec38.getN(), x9Ec38.getH(),
-                x9Ec38.getSeed()), ZrtpSecureRandom.getInstance())),
-        E255(e255, 32, new ECKeyGenerationParameters(new ECDomainParameters(curve25519.getCurve(),
-                curve25519.getG(), curve25519.getN(), curve25519.getH(),
-                curve25519.getSeed()), ZrtpSecureRandom.getInstance())),
+        EC25(ec25, 64, x9Ec25),
+        EC38(ec38, 96, x9Ec38),
+        E255(e255, 32, new X25519KeyGenerationParameters(ZrtpSecureRandom.getInstance())),
 
-        DH2K(dh2k, 256, new DHKeyGenerationParameters(ZrtpSecureRandom.getInstance(),
-                specDh2k)),
-        DH3K(dh3k, 384, new DHKeyGenerationParameters(ZrtpSecureRandom.getInstance(),
-                specDh3k)),
+        DH2K(dh2k, 256, specDh2k),
+        DH3K(dh3k, 384, specDh3k),
         MULT(mult);
-
 
         public byte[] name;
         final public AsymmetricCipherKeyPairGenerator keyPairGen;
@@ -338,6 +334,7 @@ public class ZrtpConstants {
         final public DHParameters specDh;
         final public ECCurve curve;
         final public BasicAgreement dhContext;
+        final public RawAgreement rawDhContext;
 
         SupportedPubKeys(byte[] nm) {
             name = nm;
@@ -346,39 +343,44 @@ public class ZrtpConstants {
             specDh = null;
             dhContext = null;
             curve = null;
+            rawDhContext = null;
         }
-        
-        SupportedPubKeys(byte[] nm, int size, ECKeyGenerationParameters ecdh) {
+
+        SupportedPubKeys(byte[] nm, int size, X25519KeyGenerationParameters ecdh) {
             name = nm;
             pubKeySize = size;
-            if (ecdh != null) {
-                keyPairGen = new ECKeyPairGenerator();
-                keyPairGen.init(ecdh);
-                curve = ecdh.getDomainParameters().getCurve();
-                dhContext = new ECDHBasicAgreement();
-            }
-            else {
-                curve = null;
-                keyPairGen = null;
-                dhContext = null;
-            }
+            keyPairGen = new X25519KeyPairGenerator();
+            keyPairGen.init(ecdh);
+            rawDhContext = new X25519Agreement();
+            dhContext = null;
+            specDh = null;
+            curve = null;
+        }
+
+        SupportedPubKeys(byte[] nm, int size, X9ECParameters ecdh) {
+            name = nm;
+            pubKeySize = size;
+            ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(
+                new ECDomainParameters(ecdh.getCurve(), ecdh.getG(), ecdh.getN(), ecdh.getH(), ecdh.getSeed()),
+                ZrtpSecureRandom.getInstance());
+            keyPairGen = new ECKeyPairGenerator();
+            keyPairGen.init(keyGenerationParameters);
+            curve = ecdh.getCurve();
+            dhContext = new ECDHBasicAgreement();
+            rawDhContext = null;
             specDh = null;
         }
 
-        SupportedPubKeys(byte[] nm, int size, DHKeyGenerationParameters dh) {
+        SupportedPubKeys(byte[] nm, int size, DHParameters dh) {
             name = nm;
             pubKeySize = size;
-            if (dh != null) {
-                keyPairGen = new DHBasicKeyPairGenerator();
-                keyPairGen.init(dh);
-                specDh = dh.getParameters();
-                dhContext = new DHBasicAgreement();
-            }
-            else {
-                keyPairGen = null;
-                specDh = null;
-                dhContext = null;
-            }
+            DHKeyGenerationParameters dhKeyGenerationParameters
+                = new DHKeyGenerationParameters(ZrtpSecureRandom.getInstance(), dh);
+            keyPairGen = new DHBasicKeyPairGenerator();
+            keyPairGen.init(dhKeyGenerationParameters);
+            specDh = dh;
+            dhContext = new DHBasicAgreement();
+            rawDhContext = null;
             curve = null;
         }
     }

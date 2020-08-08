@@ -36,12 +36,14 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.params.DHPublicKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.X25519PublicKeyParameters;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.EnumSet;
+import org.bouncycastle.math.ec.rfc7748.X25519;
 
 /**
  * The main ZRTP class.
@@ -1304,14 +1306,16 @@ public class ZRtp {
         }
         // Here produce the ECDH stuff
         else if (pubKey == ZrtpConstants.SupportedPubKeys.EC25
-                || pubKey == ZrtpConstants.SupportedPubKeys.EC38
-                || pubKey == ZrtpConstants.SupportedPubKeys.E255) {
-
+                || pubKey == ZrtpConstants.SupportedPubKeys.EC38) {
             ecKeyPair = pubKey.keyPairGen.generateKeyPair();
             byte[] encoded = ((ECPublicKeyParameters) ecKeyPair.getPublic()).getQ()
-                    .getEncoded(pubKey == ZrtpConstants.SupportedPubKeys.E255);
+                    .getEncoded(false);
             pubKeyBytes = new byte[pubKey.pubKeySize];
             System.arraycopy(encoded, 1, pubKeyBytes, 0, pubKey.pubKeySize);
+        }
+        else if (pubKey == ZrtpConstants.SupportedPubKeys.E255) {
+            ecKeyPair = pubKey.keyPairGen.generateKeyPair();
+            pubKeyBytes = ((X25519PublicKeyParameters) ecKeyPair.getPublic()).getEncoded();
         }
         else {
             return false;
@@ -1569,20 +1573,23 @@ public class ZRtp {
             DHss = bi.toByteArray();
         }
         // Here produce the ECDH stuff
-        else if (pubKey == ZrtpConstants.SupportedPubKeys.EC25
-                || pubKey == ZrtpConstants.SupportedPubKeys.EC38
-                || pubKey == ZrtpConstants.SupportedPubKeys.E255) {
+        else if (pubKey == ZrtpConstants.SupportedPubKeys.EC25 || pubKey == ZrtpConstants.SupportedPubKeys.EC38) {
 
             byte[] encoded = new byte[pvrBytes.length + 1];
-            encoded[0] = (byte)(pubKey == ZrtpConstants.SupportedPubKeys.E255
-                    ? 0x02   // compressed, i.e. X only
-                    : 0x04); // uncompressed
+            encoded[0] = 0x04; // uncompressed
             System.arraycopy(pvrBytes, 0, encoded, 1, pvrBytes.length);
             ECPoint point = pubKey.curve.decodePoint(encoded);
             dhSize = pubKey.pubKeySize / 2;
             pubKey.dhContext.init(ecKeyPair.getPrivate());
             BigInteger bi = pubKey.dhContext.calculateAgreement(new ECPublicKeyParameters(point, null));
             DHss = bi.toByteArray();
+        }
+        else if (pubKey == ZrtpConstants.SupportedPubKeys.E255) {
+            dhSize = pubKey.pubKeySize;
+            pubKey.rawDhContext.init(ecKeyPair.getPrivate());
+            X25519PublicKeyParameters xpubKey = new X25519PublicKeyParameters(pvrBytes, 0);
+            DHss = new byte[X25519.POINT_SIZE];
+            pubKey.rawDhContext.calculateAgreement(xpubKey, DHss, 0);
         }
         else {
             errMsg[0] = ZrtpCodes.ZrtpErrorCodes.CriticalSWError;
@@ -1684,20 +1691,23 @@ public class ZRtp {
             DHss = bi.toByteArray();
         }
         // Here produce the ECDH stuff
-        else if (pubKey == ZrtpConstants.SupportedPubKeys.EC25
-                || pubKey == ZrtpConstants.SupportedPubKeys.EC38
-                || pubKey == ZrtpConstants.SupportedPubKeys.E255) {
+        else if (pubKey == ZrtpConstants.SupportedPubKeys.EC25 || pubKey == ZrtpConstants.SupportedPubKeys.EC38) {
 
             byte[] encoded = new byte[pviBytes.length + 1];
-            encoded[0] = (byte)(pubKey == ZrtpConstants.SupportedPubKeys.E255
-                    ? 0x02   // compressed, i.e. X only
-                    : 0x04); // uncompressed
+            encoded[0] = 0x04; // uncompressed
             System.arraycopy(pviBytes, 0, encoded, 1, pviBytes.length);
             ECPoint pubPoint = pubKey.curve.decodePoint(encoded);
             dhSize = pubKey.pubKeySize / 2;
             pubKey.dhContext.init(ecKeyPair.getPrivate());
             BigInteger bi = pubKey.dhContext.calculateAgreement(new ECPublicKeyParameters(pubPoint, null));
             DHss = bi.toByteArray();
+        }
+        else if (pubKey == ZrtpConstants.SupportedPubKeys.E255) {
+            dhSize = pubKey.pubKeySize;
+            pubKey.rawDhContext.init(ecKeyPair.getPrivate());
+            X25519PublicKeyParameters xpubKey = new X25519PublicKeyParameters(pviBytes, 0);
+            DHss = new byte[X25519.POINT_SIZE];
+            pubKey.rawDhContext.calculateAgreement(xpubKey, DHss, 0);
         }
         else {
             errMsg[0] = ZrtpCodes.ZrtpErrorCodes.CriticalSWError;
@@ -3082,19 +3092,4 @@ public class ZRtp {
         }
         return dhtype == ZrtpConstants.SupportedPubKeys.DH3K && !pvr.equals(ZrtpConstants.P3072MinusOne);
     }
-
-    // public static void main(String argv[]) {
-    // byte[] data=
-    // {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
-    // ZRtp zrtp = null;
-    // try {
-    // zrtp = new ZRtp(data, null, "GNU ZRTP4J 1.0.0", null);
-    // } catch (GeneralSecurityException e) {
-    // e.printStackTrace();
-    // }
-    // ZrtpUtils.hexdump("Hello packet", zrtp.zrtpHello.getHeaderBase(),
-    // zrtp.zrtpHello.getHeaderBase().length);
-    // System.err.println("ZRtp done");
-    // }
-
 }

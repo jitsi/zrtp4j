@@ -20,8 +20,8 @@
 package gnu.java.zrtp.packets;
 
 import gnu.java.zrtp.ZrtpConstants;
+import gnu.java.zrtp.ZrtpConstants.*;
 import gnu.java.zrtp.utils.ZrtpUtils;
-import org.bouncycastle.math.ec.custom.djb.Curve25519;
 
 
 /**
@@ -84,19 +84,19 @@ public class ZrtpPacketDHPart extends ZrtpPacketBase {
 
         short len = getLength();
         if (len == 85) {
-            dhLength = 256;
+            dhLength = SupportedPubKeys.DH2K.pubKeySize;
         }
         else if (len == 117) {
-            dhLength = 384;
+            dhLength = SupportedPubKeys.DH3K.pubKeySize;
         }
         else if (len == 37) {
-            dhLength = 64;
+            dhLength = SupportedPubKeys.EC25.pubKeySize;
         }
         else if (len == 45) {
-            dhLength = 96;
+            dhLength = SupportedPubKeys.EC38.pubKeySize;
         }
-        else if (len == 29) {    // E255
-            dhLength = 32;
+        else if (len == 29) {
+            dhLength = SupportedPubKeys.E255.pubKeySize;
         }
         else {
             dhLength = 0;
@@ -104,23 +104,7 @@ public class ZrtpPacketDHPart extends ZrtpPacketBase {
     }
 
     public void setPubKeyType(final ZrtpConstants.SupportedPubKeys pkt) {
-        if (pkt == ZrtpConstants.SupportedPubKeys.DH2K) {
-            dhLength = 256;
-        }
-        else if (pkt == ZrtpConstants.SupportedPubKeys.DH3K) {
-            dhLength = 384;
-        }
-        else if (pkt == ZrtpConstants.SupportedPubKeys.EC25) {
-            dhLength = 64;
-        }
-        else if (pkt == ZrtpConstants.SupportedPubKeys.EC38) {
-            dhLength = 96;
-        }
-        else if (pkt == ZrtpConstants.SupportedPubKeys.E255) {
-            dhLength = 32; //or new Curve25519().getBitLength()/8
-        }
-        else
-            return;
+        dhLength = pkt.pubKeySize;
         // compute total length of ZRTP message including space for CRC
         int length = DHPART_FIXED_LENGTH + dhLength + (2 * ZRTP_WORD_SIZE);  // HMAC field is 2*ZRTP_WORD_SIZE
         
