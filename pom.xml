@@ -6,7 +6,7 @@
 
     <groupId>org.jitsi</groupId>
     <artifactId>zrtp4j-light</artifactId>
-    <version>4.1.2-SNAPSHOT</version>
+    <version>4.1.2</version>
     <packaging>bundle</packaging>
     <description>ZRTP for Java library, Jitsi fork without embedded ciphers</description>
 
@@ -27,10 +27,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/dnsjava/dnsjava</connection>
-        <developerConnection>scm:git:https://github.com/dnsjava/dnsjava</developerConnection>
-        <url>https://github.com/dnsjava/dnsjava</url>
-        <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/jitsi/zrtp4j</connection>
+        <developerConnection>scm:git:https://github.com/jitsi/zrtp4j</developerConnection>
+        <url>https://github.com/jitsi/zrtp4j</url>
+        <tag>v4.1.2</tag>
     </scm>
 
     <licenses>
