@@ -2759,23 +2759,42 @@ public class ZRtp {
     }
 
     /*
-     * The ZRTP KDF function as per ZRT specification 4.5.1
+     * The ZRTP KDF function as per rfc6189#section-4.5.1
      */
     private byte[] KDF(byte[] ki, byte[] label, byte[] context, int L) {
+        // The HMAC in the KDF is keyed by KI [...]
         KeyParameter key = new KeyParameter(ki, 0, hashLength);
         hmacFunction.init(key);
 
+        // The first field is a 32-bit big-endian integer counter
+        // (i) required by NIST to be included in the HMAC each time the HMAC is
+        // computed, which we have set to the fixed value of 0x000001 because we
+        // only compute the HMAC once.
         byte[] counter = ZrtpUtils.int32ToArray(1);
         hmacFunction.update(counter, 0, 4);
-        hmacFunction.update(label, 0, label.length); // the label includes the 0
-                                                     // byte separator
+        
+        // Label is a string of nonzero octets that
+        // identifies the purpose for the derived keying material.  The octet
+        // 0x00 is a delimiter required by NIST.
+        //
+        // the label includes the 0 byte separator
+        hmacFunction.update(label, 0, label.length);
+        
+        // The NIST KDF formula has a
+        // "Context" field that includes ZIDi, ZIDr, and some optional nonce
+        // material known to both parties.
         hmacFunction.update(context, 0, context.length);
+        
+        // L is a 32-bit big-endian positive
+        // integer, not to exceed the length in bits of the output of the HMAC.
         byte[] length = ZrtpUtils.int32ToArray(L);
         hmacFunction.update(length, 0, 4);
 
         byte[] retval = new byte[hashLength];
         hmacFunction.doFinal(retval, 0);
-        return retval;
+
+        // The output of the KDF is truncated to the leftmost L bits.
+        return Arrays.copyOf(retval, L / 8);
     }
 
     private void computeSRTPKeys() {
@@ -2796,7 +2815,7 @@ public class ZRtp {
 
         int keyLen = cipher.keyLength * 8;
 
-        // Inititiator key and salt
+        // Initiator key and salt
         srtpKeyI = KDF(s0, ZrtpConstants.iniMasterKey, KDFcontext, keyLen);
         srtpSaltI = KDF(s0, ZrtpConstants.iniMasterSalt, KDFcontext, 112);
 
