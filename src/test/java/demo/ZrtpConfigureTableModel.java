@@ -5,36 +5,32 @@ import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
 
 import gnu.java.zrtp.ZrtpConfigure;
-import gnu.java.zrtp.ZrtpConstants;
 
 public class ZrtpConfigureTableModel<T extends Enum<T>> extends AbstractTableModel {
 
     private final ZrtpConfigure active;
     private final ZrtpConfigure inActive;
-    
+
     // used to identify the Enum class when calling ZrtpConfigure methods.
-    private final T algorithm;  
+    private final T algorithm;
     private final Class<T> clazz;
-    private final String savedConfigureKey;
-    
-    boolean onOff[];
 
     public ZrtpConfigureTableModel(T algo, ZrtpConfigure act,
             ZrtpConfigure inAct, String savedConf) {
         active = act;
         inActive = inAct;
         algorithm = algo;
-        
+
         clazz = algorithm.getDeclaringClass();
-        savedConfigureKey = clazz.getName().replace('$', '_');
-        
+        String savedConfigureKey = clazz.getName().replace('$', '_');
+
         initialize(savedConf);
     }
 
     private void initialize(String savedConf) {
 
         // Get all enums constants of this Enum to process
-        T enumValues[] = clazz.getEnumConstants();
+        T[] enumValues = clazz.getEnumConstants();
 
         // first build a list of all available algorithms of this type
         ArrayList<String> fullList = new ArrayList<String>(enumValues.length);
@@ -42,47 +38,43 @@ public class ZrtpConfigureTableModel<T extends Enum<T>> extends AbstractTableMod
             fullList.add(sh.name());
         }
 
-        String savedAlgos[] = savedConf.split(";");
+        String[] savedAlgos = savedConf.split(";");
         // Configure saved algorithms as active, remove them from full list of
         // algos
         for (String str : savedAlgos) {
             T algoEnum = Enum.valueOf(clazz, str);
-            if (algoEnum != null) {
-                active.addAlgo(algoEnum);
-                fullList.remove(str);
-            }
+            active.addAlgo(algoEnum);
+            fullList.remove(str);
         }
         // rest of algorithms are inactive
         for (String str : fullList) {
             T algoEnum = Enum.valueOf(clazz, str);
-            if (algoEnum != null) {
-                inActive.addAlgo(algoEnum);
-            }
+            inActive.addAlgo(algoEnum);
         }
     }
 
-    public int getColumnCount() { 
+    public int getColumnCount() {
         return 2;
     }
-    
-    public int getRowCount() { 
+
+    public int getRowCount() {
         return active.getNumConfiguredAlgos(algorithm) + inActive.getNumConfiguredAlgos(algorithm);
     }
-    
+
     public Object getValueAt(int row, int col) {
         switch (col)
         {
         case 0:
             if (row >= active.getNumConfiguredAlgos(algorithm)) {
-                return (new Boolean(false));
+                return (Boolean.FALSE);
             }
-            return (new Boolean(true));
+            return (Boolean.TRUE);
         case 1:
             if (row >= active.getNumConfiguredAlgos(algorithm)) {
                 row -= active.getNumConfiguredAlgos(algorithm);
                 return (inActive.getAlgoAt(row, algorithm).name());
             }
-            else 
+            else
                 return (active.getAlgoAt(row, algorithm).name());
         default:
             return null;
@@ -98,7 +90,7 @@ public class ZrtpConfigureTableModel<T extends Enum<T>> extends AbstractTableMod
         return (columnIndex == 0) ? Boolean.class : super
             .getColumnClass(columnIndex);
     }
-    
+
     public void setValueAt(Object value, int row, int column)
     {
         if ((column == 0) && (value instanceof Boolean))
@@ -118,10 +110,10 @@ public class ZrtpConfigureTableModel<T extends Enum<T>> extends AbstractTableMod
 
     /**
      * Move a Configuration entry up or down one position.
-     * 
+     *
      * The "move up" is Converted to a "move down" with modified row index
      * and flags.
-     * 
+     *
      * @param row
      *        Which row to move
      * @param up
@@ -130,7 +122,6 @@ public class ZrtpConfigureTableModel<T extends Enum<T>> extends AbstractTableMod
      *        Because the functions converts a move up into a move down
      *        this flag shows what the caller intented. Needed to adjust
      *        an index return value.
-     * @return
      */
     public int move(int row, boolean up, boolean upSave) {
         if (up) {
@@ -171,7 +162,7 @@ public class ZrtpConfigureTableModel<T extends Enum<T>> extends AbstractTableMod
         fireTableRowsUpdated(0, getRowCount());
         return row + 1;
     }
-    
+
     public boolean checkEnableUp(int row) {
         return (row < active.getNumConfiguredAlgos(algorithm));
     }
@@ -179,28 +170,28 @@ public class ZrtpConfigureTableModel<T extends Enum<T>> extends AbstractTableMod
     public boolean checkEnableDown(int row) {
         return (row < active.getNumConfiguredAlgos(algorithm) - 1);
     }
-    
+
     /**
      * Saves the ZrtpConfigure data for this algorithm to configure file
      */
     public void saveConfig() {
-        StringBuffer algoStr = new StringBuffer();
+        StringBuilder algoStr = new StringBuilder();
         for (T sh: active.algos(algorithm)) {
             algoStr.append(sh.name());
             algoStr.append(';');
         }
         // save in configuration data using the appropriate key
     }
-    
+
     /**
      * Sets the ZrtpConfigure data for this algorithm to a predefined set.
-     * 
+     *
      * The caller prepared active ZrtpConfigureto contain a standard set of
      * algorithms. Get the names and construct a string, then call initialize
      * to setup the inActive ZrtpConfigure data.
      */
     public void setStandardConfig() {
-        StringBuffer algoStr = new StringBuffer();
+        StringBuilder algoStr = new StringBuilder();
         for (T sh: active.algos(algorithm)) {
             algoStr.append(sh.name());
             algoStr.append(';');

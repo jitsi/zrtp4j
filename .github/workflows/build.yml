@@ -1,28 +1,57 @@
 name: Java CI with Maven
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  # Java version to use for the release
+  RELEASE_JAVA_VERSION: 11
 
 jobs:
-  build:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 11, 17 ]
+    name: Java ${{ matrix.java }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - name: Build
+        run: mvn -B verify -DperformRelease=true
+
+  release:
+    if: github.ref == 'refs/heads/master'
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1.2.0
-      - name: Set up JDK
-        uses: actions/setup-java@v1.3.0
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          java-version: 8
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: ${{ env.RELEASE_JAVA_VERSION }}
+          cache: maven
           server-id: ossrh
           server-username: SONATYPE_USER
           server-password: SONATYPE_PW
 
-      - name: Build
-        run: mvn -B package
-
-      - name: Extract Branch Name
-        run: echo "::set-env name=BRANCH::$(echo ${GITHUB_REF#refs/heads/})"
-
       - name: Release to Maven Central
-        if: env.BRANCH == 'master'
         env:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_PW: ${{ secrets.SONATYPE_PW }}
@@ -34,4 +63,6 @@ jobs:
             --batch-mode \
             -Dgpg.passphrase="${{ secrets.GPG_PW }}" \
             -DperformRelease=true \
+            -Drelease=true \
+            -DskipTests \
             deploy
